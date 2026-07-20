@@ -1,16 +1,6 @@
 # War Territory Helper
 
-A helper tool for managing and tracking war territories.
-
-## Overview
-
-This project provides utilities for territory management and warfare strategy coordination.
-
-## Features
-
-- Territory tracking and management
-- Strategic planning tools
-- Real-time coordination
+A helper tool for managing territory and reinforcement counts when playing the war board game. The main idea is to avoid having to recount number of territories at the start of a turn to figure out how many armies can be placed by a given player.
 
 ## Installation
 
@@ -19,15 +9,3 @@ Clone the repository:
 git clone https://github.com/mtschneiders/war-territory-helper.git
 cd war-territory-helper
 ```
-
-## Usage
-
-Open the HTML files in your browser to start using the tool.
-
-## Contributing
-
-Feel free to submit issues and enhancement requests!
-
-## License
-
-This project is available for use and modification.
