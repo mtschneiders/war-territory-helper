@@ -664,249 +664,557 @@
       top: 0;
       z-index: 1000;
     }
+
+    /* TURN MODE STYLES */
+    .turn-mode-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--bg-gradient);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .turn-mode-header {
+      padding: 30px 40px;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .turn-mode-title {
+      font-size: 2rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .current-player-name {
+      background: linear-gradient(135deg, var(--accent-color) 0%, #4f46e5 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .turn-mode-content {
+      flex: 1;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+      overflow-y: auto;
+    }
+
+    .turn-player-card {
+      padding: 30px;
+      border: 3px solid;
+      border-radius: 20px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      align-items: center;
+    }
+
+    .turn-player-card.current {
+      border-color: var(--player-color, #6366f1);
+      background: rgba(99, 102, 241, 0.05);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 0 40px rgba(99, 102, 241, 0.2);
+    }
+
+    .turn-player-info {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .turn-player-name {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--player-color, #6366f1);
+    }
+
+    .turn-player-stats {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .turn-stat {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.3rem;
+    }
+
+    .turn-stat-label {
+      color: var(--text-secondary);
+      min-width: 120px;
+    }
+
+    .turn-stat-value {
+      font-weight: 700;
+      font-size: 1.5rem;
+    }
+
+    .turn-attacks-container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .turn-attacks-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .attack-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px;
+      background: rgba(15, 23, 42, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      flex-wrap: wrap;
+    }
+
+    .attack-label {
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      min-width: 100px;
+    }
+
+    .attack-button {
+      padding: 12px 24px;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+      min-width: 140px;
+    }
+
+    .attack-won {
+      background: var(--success-color);
+      color: white;
+    }
+
+    .attack-won:hover {
+      background: #059669;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .defender-badge {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 1.05rem;
+    }
+
+    .turn-mode-actions {
+      display: flex;
+      gap: 16px;
+      margin-top: auto;
+    }
+
+    .btn-end-turn {
+      flex: 1;
+      padding: 16px;
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    .btn-exit-turn {
+      padding: 16px 32px;
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    @media (max-width: 1024px) {
+      .turn-player-card {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .turn-mode-header {
+        padding: 20px;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .turn-mode-title {
+        font-size: 1.5rem;
+      }
+
+      .turn-mode-content {
+        padding: 20px;
+        gap: 20px;
+      }
+
+      .turn-player-card {
+        padding: 20px;
+        gap: 20px;
+      }
+
+      .turn-player-name {
+        font-size: 1.8rem;
+      }
+
+      .attack-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .attack-button {
+        width: 100%;
+      }
+    }
   </style>
 </head>
 <body>
   <div id="app" style="display: flex; flex-direction: column; min-height: 100vh;">
-    <!-- Header -->
-    <header>
-      <div class="logo-container">
-        <i class="fa-solid fa-shield-halved logo-icon"></i>
-        <div>
-          <h1>WarHelper</h1>
-          <p class="subtitle">Territory & Reinforcement Calculator</p>
+    <!-- TURN MODE VIEW -->
+    <div v-if="turnMode.active" class="turn-mode-overlay">
+      <div class="turn-mode-header">
+        <div class="turn-mode-title">
+          <i class="fa-solid fa-sword" style="color: var(--accent-color);"></i>
+          Turn Mode - <span class="current-player-name">{{ turnMode.currentPlayer.name }}'s Turn</span>
         </div>
-      </div>
-      <div style="display: flex; gap: 12px;">
-        <button @click="resetGame" class="btn btn-danger-outline" title="Reset All Players and Territories">
-          <i class="fa-solid fa-rotate-left"></i> Reset Board
+        <button @click="exitTurnMode" class="btn btn-danger-outline btn-exit-turn">
+          <i class="fa-solid fa-times"></i> Exit Turn Mode
         </button>
       </div>
-    </header>
 
-    <!-- Main Workspace -->
-    <main>
-      <!-- Left Column: Players -->
-      <section class="players-section">
-        <!-- Global Distribution widget -->
-        <div class="glass-panel sidebar-widget territory-share">
-          <h3 class="widget-title">
-            <i class="fa-solid fa-chart-pie" style="color: #c084fc;"></i> Territory Share
-          </h3>
-          
-          <!-- Bar graph -->
-          <div class="dist-bar-container">
-            <div 
-              v-for="player in players" 
-              :key="player.id"
-              class="dist-segment"
-              :style="{ 
-                width: getPercentage(player.territories) + '%', 
-                backgroundColor: player.color 
-              }"
-              :title="player.name + ': ' + player.territories + ' territories'"
-            ></div>
-          </div>
-
-          <!-- Legend -->
-          <div class="dist-legend">
-            <div v-for="player in players" :key="player.id" class="legend-item">
-              <span class="legend-dot" :style="{ backgroundColor: player.color }"></span>
-              <span style="font-weight: 500;">{{ player.name }}</span>
-              <span style="color: var(--text-secondary)">({{ player.territories }})</span>
-            </div>
-            <div class="legend-item" v-if="remainingTerritories > 0">
-              <span class="legend-dot" style="background-color: rgba(255,255,255,0.1);"></span>
-              <span>Unassigned</span>
-              <span style="color: var(--text-secondary)">({{ remainingTerritories }})</span>
-            </div>
-          </div>
-        </div>
-        <div class="section-header">
-          <div class="section-title">
-            <i class="fa-solid fa-users text-indigo-400"></i> Active Players
-            <span v-if="players.length" class="alert-pill" :class="totalOwned === settings.totalTerritories ? 'alert-pill-success' : 'alert-pill-warning'">
-              {{ totalOwned }} / {{ settings.totalTerritories }} Territories Assigned
-            </span>
-          </div>
-          <button @click="addPlayer" class="btn btn-primary" :disabled="players.length >= 6">
-            <i class="fa-solid fa-user-plus"></i> Add Player
-          </button>
-        </div>
-
-        <!-- Empty State -->
-        <div v-if="players.length === 0" class="glass-panel empty-state">
-          <i class="fa-solid fa-map-location-dot empty-icon"></i>
-          <p class="empty-title">No Players Added Yet</p>
-          <p class="empty-desc">Create players to start tracking territories and automatic troop reinforcement generation.</p>
-          <div style="display: flex; gap: 12px; margin-top: 8px;">
-            <button @click="addPlayer" class="btn btn-primary">
-              <i class="fa-solid fa-user-plus"></i> Add Player
-            </button>
-            <button @click="setupStandardGame" class="btn btn-danger-outline">
-              <i class="fa-solid fa-wand-magic-sparkles"></i> 4 Players Setup
-            </button>
-          </div>
-        </div>
-
-        <!-- Players List -->
-        <div v-else style="display: flex; flex-direction: column; gap: 16px;">
-          <div 
-            v-for="(player, index) in players" 
-            :key="player.id" 
-            class="glass-panel player-card"
-            :style="{ '--player-color': player.color }"
-          >
-            <!-- Card Header -->
-            <div class="player-header">
-               <div class="player-info">
-                <!-- Player Color Selector -->
-                <select 
-                  :value="player.name" 
-                  @change="changePlayerColor(player, $event.target.value)"
-                  class="player-color-select"
-                  title="Change player color"
-                  :style="{ color: player.color, borderLeft: '4px solid ' + player.color }"
-                >
-                  <option 
-                    v-for="profile in getAvailableProfilesFor(player)" 
-                    :key="profile.name" 
-                    :value="profile.name"
-                  >
-                    {{ profile.name }}
-                  </option>
-                </select>
+      <div class="turn-mode-content">
+        <!-- Current Player Card -->
+        <div 
+          class="glass-panel turn-player-card current"
+          :style="{ '--player-color': turnMode.currentPlayer.color }"
+        >
+          <div class="turn-player-info">
+            <div class="turn-player-name">{{ turnMode.currentPlayer.name }}</div>
+            <div class="turn-player-stats">
+              <div class="turn-stat">
+                <span class="turn-stat-label"><i class="fa-solid fa-map"></i> Territories:</span>
+                <span class="turn-stat-value">{{ turnMode.currentPlayer.territories }}</span>
               </div>
+              <div class="turn-stat">
+                <span class="turn-stat-label"><i class="fa-solid fa-plus-minus"></i> Reinforcements:</span>
+                <span class="turn-stat-value" style="color: #a5b4fc;">{{ calculateTotalReinforcements(turnMode.currentPlayer) }}</span>
+              </div>
+              <div class="turn-stat">
+                <span class="turn-stat-label"><i class="fa-solid fa-shield"></i> Base:</span>
+                <span class="turn-stat-value">{{ calculateBaseReinforcements(turnMode.currentPlayer.territories) }}</span>
+              </div>
+              <div v-if="calculateContinentBonusValue(turnMode.currentPlayer) > 0" class="turn-stat">
+                <span class="turn-stat-label"><i class="fa-solid fa-earth-americas"></i> Continents:</span>
+                <span class="turn-stat-value">+{{ calculateContinentBonusValue(turnMode.currentPlayer) }}</span>
+              </div>
+            </div>
+          </div>
 
-              <!-- Counter and Deletion -->
-              <div class="player-actions">
-                <div class="counter-control">
-                  <button @click="decrementTerritories(player)" class="counter-btn" title="Decrease Territories">
-                    <i class="fa-solid fa-minus"></i>
-                  </button>
-                  <input 
-                    type="number" 
-                    v-model.number="player.territories" 
-                    min="0" 
-                    max="1000"
-                    class="counter-value"
-                  >
-                  <button @click="incrementTerritories(player)" class="counter-btn" title="Increase Territories">
-                    <i class="fa-solid fa-plus"></i>
-                  </button>
-                </div>
-
-                <button @click="removePlayer(index)" class="btn btn-icon btn-icon-danger" title="Remove Player">
-                  <i class="fa-solid fa-trash-can"></i>
+          <!-- Attacks Section -->
+          <div class="turn-attacks-container">
+            <div class="turn-attacks-title">Record Attacks</div>
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+              <div v-for="opponent in getOpponents(turnMode.currentPlayer)" :key="opponent.id" class="attack-row">
+                <span class="attack-label">vs</span>
+                <span class="defender-badge">{{ opponent.name }}</span>
+                <button @click="recordAttack(opponent)" class="attack-button attack-won">
+                  <i class="fa-solid fa-check"></i> Won
                 </button>
               </div>
             </div>
+          </div>
+        </div>
 
-            <!-- Continent Selector Component (Collapsible) -->
-            <div class="continents-container">
-              <div 
-                @click="player.showContinentMenu = !player.showContinentMenu" 
-                style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none;"
-              >
-                <span class="continent-title" style="margin-bottom: 0;">
-                  🌍 Continents <span style="font-size: 0.8rem; color: var(--text-secondary); text-transform: none;">({{ player.continents.length }} controlled)</span>
-                </span>
-                <i class="fa-solid" :class="player.showContinentMenu ? 'fa-chevron-up' : 'fa-chevron-down'" style="color: var(--text-secondary); font-size: 0.85rem;"></i>
+        <!-- Opponent Cards (Read-only) -->
+        <div v-for="opponent in getOpponents(turnMode.currentPlayer)" :key="opponent.id" class="glass-panel turn-player-card">
+          <div class="turn-player-info">
+            <div class="turn-player-name" :style="{ color: opponent.color }">{{ opponent.name }}</div>
+            <div class="turn-player-stats">
+              <div class="turn-stat">
+                <span class="turn-stat-label"><i class="fa-solid fa-map"></i> Territories:</span>
+                <span class="turn-stat-value">{{ opponent.territories }}</span>
               </div>
-              
-              <!-- Checkbox Grid (Visible when toggled open) -->
-              <div v-if="player.showContinentMenu" class="continents-grid" style="margin-top: 12px;">
+              <div class="turn-stat">
+                <span class="turn-stat-label"><i class="fa-solid fa-plus-minus"></i> Reinforcements:</span>
+                <span class="turn-stat-value" style="color: #a5b4fc;">{{ calculateTotalReinforcements(opponent) }}</span>
+              </div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; justify-content: center;">
+            <i class="fa-solid fa-shield" style="font-size: 4rem; opacity: 0.3;"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer Actions -->
+      <div style="padding: 20px 40px; border-top: 2px solid rgba(255, 255, 255, 0.1); display: flex; gap: 16px;">
+        <button @click="nextTurn" class="btn btn-primary btn-end-turn">
+          <i class="fa-solid fa-arrow-right"></i> Next Player
+        </button>
+      </div>
+    </div>
+
+    <!-- NORMAL VIEW -->
+    <template v-else>
+      <!-- Header -->
+      <header>
+        <div class="logo-container">
+          <i class="fa-solid fa-shield-halved logo-icon"></i>
+          <div>
+            <h1>WarHelper</h1>
+            <p class="subtitle">Territory & Reinforcement Calculator</p>
+          </div>
+        </div>
+        <div style="display: flex; gap: 12px;">
+          <button v-if="players.length > 0" @click="enterTurnMode" class="btn btn-primary" title="Start Turn Mode">
+            <i class="fa-solid fa-sword"></i> Turn Mode
+          </button>
+          <button @click="resetGame" class="btn btn-danger-outline" title="Reset All Players and Territories">
+            <i class="fa-solid fa-rotate-left"></i> Reset Board
+          </button>
+        </div>
+      </header>
+
+      <!-- Main Workspace -->
+      <main>
+        <!-- Left Column: Players -->
+        <section class="players-section">
+          <!-- Global Distribution widget -->
+          <div class="glass-panel sidebar-widget territory-share">
+            <h3 class="widget-title">
+              <i class="fa-solid fa-chart-pie" style="color: #c084fc;"></i> Territory Share
+            </h3>
+            
+            <!-- Bar graph -->
+            <div class="dist-bar-container">
+              <div 
+                v-for="player in players" 
+                :key="player.id"
+                class="dist-segment"
+                :style="{ 
+                  width: getPercentage(player.territories) + '%', 
+                  backgroundColor: player.color 
+                }"
+                :title="player.name + ': ' + player.territories + ' territories'"
+              ></div>
+            </div>
+
+            <!-- Legend -->
+            <div class="dist-legend">
+              <div v-for="player in players" :key="player.id" class="legend-item">
+                <span class="legend-dot" :style="{ backgroundColor: player.color }"></span>
+                <span style="font-weight: 500;">{{ player.name }}</span>
+                <span style="color: var(--text-secondary)">({{ player.territories }})</span>
+              </div>
+              <div class="legend-item" v-if="remainingTerritories > 0">
+                <span class="legend-dot" style="background-color: rgba(255,255,255,0.1);"></span>
+                <span>Unassigned</span>
+                <span style="color: var(--text-secondary)">({{ remainingTerritories }})</span>
+              </div>
+            </div>
+          </div>
+          <div class="section-header">
+            <div class="section-title">
+              <i class="fa-solid fa-users text-indigo-400"></i> Active Players
+              <span v-if="players.length" class="alert-pill" :class="totalOwned === settings.totalTerritories ? 'alert-pill-success' : 'alert-pill-warning'">
+                {{ totalOwned }} / {{ settings.totalTerritories }} Territories Assigned
+              </span>
+            </div>
+            <button @click="addPlayer" class="btn btn-primary" :disabled="players.length >= 6">
+              <i class="fa-solid fa-user-plus"></i> Add Player
+            </button>
+          </div>
+
+          <!-- Empty State -->
+          <div v-if="players.length === 0" class="glass-panel empty-state">
+            <i class="fa-solid fa-map-location-dot empty-icon"></i>
+            <p class="empty-title">No Players Added Yet</p>
+            <p class="empty-desc">Create players to start tracking territories and automatic troop reinforcement generation.</p>
+            <div style="display: flex; gap: 12px; margin-top: 8px;">
+              <button @click="addPlayer" class="btn btn-primary">
+                <i class="fa-solid fa-user-plus"></i> Add Player
+              </button>
+              <button @click="setupStandardGame" class="btn btn-danger-outline">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> 4 Players Setup
+              </button>
+            </div>
+          </div>
+
+          <!-- Players List -->
+          <div v-else style="display: flex; flex-direction: column; gap: 16px;">
+            <div 
+              v-for="(player, index) in players" 
+              :key="player.id" 
+              class="glass-panel player-card"
+              :style="{ '--player-color': player.color }"
+            >
+              <!-- Card Header -->
+              <div class="player-header">
+                <div class="player-info">
+                  <!-- Player Color Selector -->
+                  <select 
+                    :value="player.name" 
+                    @change="changePlayerColor(player, $event.target.value)"
+                    class="player-color-select"
+                    title="Change player color"
+                    :style="{ color: player.color, borderLeft: '4px solid ' + player.color }"
+                  >
+                    <option 
+                      v-for="profile in getAvailableProfilesFor(player)" 
+                      :key="profile.name" 
+                      :value="profile.name"
+                    >
+                      {{ profile.name }}
+                    </option>
+                  </select>
+                </div>
+
+                <!-- Counter and Deletion -->
+                <div class="player-actions">
+                  <div class="counter-control">
+                    <button @click="decrementTerritories(player)" class="counter-btn" title="Decrease Territories">
+                      <i class="fa-solid fa-minus"></i>
+                    </button>
+                    <input 
+                      type="number" 
+                      v-model.number="player.territories" 
+                      min="0" 
+                      max="1000"
+                      class="counter-value"
+                    >
+                    <button @click="incrementTerritories(player)" class="counter-btn" title="Increase Territories">
+                      <i class="fa-solid fa-plus"></i>
+                    </button>
+                  </div>
+
+                  <button @click="removePlayer(index)" class="btn btn-icon btn-icon-danger" title="Remove Player">
+                    <i class="fa-solid fa-trash-can"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Continent Selector Component (Collapsible) -->
+              <div class="continents-container">
                 <div 
-                  v-for="bonus in continentBonuses" 
-                  :key="bonus.name"
-                  class="continent-badge"
-                  :class="{ active: player.continents.includes(bonus.name) }"
-                  @click="toggleContinent(player, bonus.name)"
+                  @click="player.showContinentMenu = !player.showContinentMenu" 
+                  style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none;"
                 >
-                  <i class="fa-solid" :class="player.continents.includes(bonus.name) ? 'fa-square-check' : 'fa-square'"></i>
-                  <span>{{ bonus.name }} (+{{ bonus.value }})</span>
+                  <span class="continent-title" style="margin-bottom: 0;">
+                    🌍 Continents <span style="font-size: 0.8rem; color: var(--text-secondary); text-transform: none;">({{ player.continents.length }} controlled)</span>
+                  </span>
+                  <i class="fa-solid" :class="player.showContinentMenu ? 'fa-chevron-up' : 'fa-chevron-down'" style="color: var(--text-secondary); font-size: 0.85rem;"></i>
+                </div>
+                
+                <!-- Checkbox Grid (Visible when toggled open) -->
+                <div v-if="player.showContinentMenu" class="continents-grid" style="margin-top: 12px;">
+                  <div 
+                    v-for="bonus in continentBonuses" 
+                    :key="bonus.name"
+                    class="continent-badge"
+                    :class="{ active: player.continents.includes(bonus.name) }"
+                    @click="toggleContinent(player, bonus.name)"
+                  >
+                    <i class="fa-solid" :class="player.continents.includes(bonus.name) ? 'fa-square-check' : 'fa-square'"></i>
+                    <span>{{ bonus.name }} (+{{ bonus.value }})</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Reinforcements Breakdown -->
+              <div class="calculation-summary">
+                <div style="font-size: 0.85rem; color: var(--text-secondary);">
+                  Base: {{ calculateBaseReinforcements(player.territories) }} 🛡️
+                  <span v-if="calculateContinentBonusValue(player) > 0">
+                    + Continents: {{ calculateContinentBonusValue(player) }} 🌍
+                  </span>
+                </div>
+                <div class="reinforcement-troops">
+                  <span>Reinforcements:</span>
+                  <strong>{{ calculateTotalReinforcements(player) }}</strong>
+                  <i class="fa-solid fa-plus-minus" style="font-size: 0.95rem;"></i>
                 </div>
               </div>
             </div>
+          </div>
+        </section>
 
-            <!-- Reinforcements Breakdown -->
-            <div class="calculation-summary">
-              <div style="font-size: 0.85rem; color: var(--text-secondary);">
-                Base: {{ calculateBaseReinforcements(player.territories) }} 🛡️
-                <span v-if="calculateContinentBonusValue(player) > 0">
-                  + Continents: {{ calculateContinentBonusValue(player) }} 🌍
-                </span>
+        <!-- Right Column: Dashboard Stats & Settings -->
+        <section class="sidebar">
+          
+
+          <!-- Settings panel -->
+          <div class="glass-panel sidebar-widget">
+            <h3 class="widget-title">
+              <i class="fa-solid fa-sliders" style="color: #6366f1;"></i> Game Settings
+            </h3>
+            <div class="settings-group">
+              <!-- Total Territories -->
+              <div class="setting-item">
+                <label class="setting-label">Total Board Territories</label>
+                <div class="setting-input-wrapper">
+                  <input 
+                    type="number" 
+                    v-model.number="settings.totalTerritories" 
+                    min="1" 
+                    class="setting-input"
+                  >
+                </div>
               </div>
-              <div class="reinforcement-troops">
-                <span>Reinforcements:</span>
-                <strong>{{ calculateTotalReinforcements(player) }}</strong>
-                <i class="fa-solid fa-plus-minus" style="font-size: 0.95rem;"></i>
+
+              <!-- Territory Divisor -->
+              <div class="setting-item">
+                <label class="setting-label">Territory Divisor (Divides by X)</label>
+                <div class="setting-input-wrapper">
+                  <input 
+                    type="number" 
+                    v-model.number="settings.divisor" 
+                    min="1" 
+                    class="setting-input"
+                  >
+                </div>
+              </div>
+
+              <!-- Minimum reinforcement -->
+              <div class="setting-item">
+                <label class="checkbox-switch">
+                  <input type="checkbox" v-model="settings.useMinLimit">
+                  <span class="switch-rail"></span>
+                  <span class="setting-label">Apply Minimum Reinforcement Limit</span>
+                </label>
+              </div>
+
+              <div class="setting-item" v-if="settings.useMinLimit">
+                <label class="setting-label">Minimum Reinforcement Value</label>
+                <div class="setting-input-wrapper">
+                  <input 
+                    type="number" 
+                    v-model.number="settings.minLimit" 
+                    min="0" 
+                    class="setting-input"
+                  >
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
-
-      <!-- Right Column: Dashboard Stats & Settings -->
-      <section class="sidebar">
-        
-
-        <!-- Settings panel -->
-        <div class="glass-panel sidebar-widget">
-          <h3 class="widget-title">
-            <i class="fa-solid fa-sliders" style="color: #6366f1;"></i> Game Settings
-          </h3>
-          <div class="settings-group">
-            <!-- Total Territories -->
-            <div class="setting-item">
-              <label class="setting-label">Total Board Territories</label>
-              <div class="setting-input-wrapper">
-                <input 
-                  type="number" 
-                  v-model.number="settings.totalTerritories" 
-                  min="1" 
-                  class="setting-input"
-                >
-              </div>
-            </div>
-
-            <!-- Territory Divisor -->
-            <div class="setting-item">
-              <label class="setting-label">Territory Divisor (Divides by X)</label>
-              <div class="setting-input-wrapper">
-                <input 
-                  type="number" 
-                  v-model.number="settings.divisor" 
-                  min="1" 
-                  class="setting-input"
-                >
-              </div>
-            </div>
-
-            <!-- Minimum reinforcement -->
-            <div class="setting-item">
-              <label class="checkbox-switch">
-                <input type="checkbox" v-model="settings.useMinLimit">
-                <span class="switch-rail"></span>
-                <span class="setting-label">Apply Minimum Reinforcement Limit</span>
-              </label>
-            </div>
-
-            <div class="setting-item" v-if="settings.useMinLimit">
-              <label class="setting-label">Minimum Reinforcement Value</label>
-              <div class="setting-input-wrapper">
-                <input 
-                  type="number" 
-                  v-model.number="settings.minLimit" 
-                  min="0" 
-                  class="setting-input"
-                >
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-    </main>
+        </section>
+      </main>
+    </template>
   </div>
 
   <!-- Import Vue 3 CDN -->
@@ -931,13 +1239,20 @@
         // Reactive game settings
         const settings = ref({
           totalTerritories: 42,
-          divisor: 2, // Default updated to 2 as requested
+          divisor: 2,
           useMinLimit: true,
           minLimit: 3
         });
 
         // Player states
         const players = ref([]);
+
+        // Turn mode state
+        const turnMode = ref({
+          active: false,
+          currentPlayerIndex: 0,
+          currentPlayer: null
+        });
 
         // Load configuration and data from localStorage if available
         onMounted(() => {
@@ -996,100 +1311,132 @@
           players.value.splice(index, 1);
         };
 
+        // Setup standard 4 player game
+        const setupStandardGame = () => {
+          players.value = [
+            { id: 'p1', name: 'Red', color: '#ef4444', territories: 9, continents: [], showContinentMenu: false },
+            { id: 'p2', name: 'Blue', color: '#3b82f6', territories: 9, continents: [], showContinentMenu: false },
+            { id: 'p3', name: 'Green', color: '#10b981', territories: 12, continents: [], showContinentMenu: false },
+            { id: 'p4', name: 'Yellow', color: '#eab308', territories: 12, continents: [], showContinentMenu: false }
+          ];
+        };
+
         // Toggle continent selection for a player
         const toggleContinent = (player, name) => {
-          const idx = player.continents.indexOf(name);
-          if (idx > -1) {
-            player.continents.splice(idx, 1);
+          const index = player.continents.indexOf(name);
+          if (index > -1) {
+            player.continents.splice(index, 1);
           } else {
             player.continents.push(name);
           }
         };
 
-        // Standard setup helper
-        const setupStandardGame = () => {
-          players.value = [
-            { id: '1', name: 'Red', color: '#ef4444', territories: 10, continents: [], showContinentMenu: false },
-            { id: '2', name: 'Blue', color: '#3b82f6', territories: 10, continents: [], showContinentMenu: false },
-            { id: '3', name: 'Green', color: '#10b981', territories: 10, continents: [], showContinentMenu: false },
-            { id: '4', name: 'Yellow', color: '#eab308', territories: 10, continents: [], showContinentMenu: false }
-          ];
-          settings.value.totalTerritories = 42;
-          settings.value.divisor = 2;
-          settings.value.useMinLimit = true;
-          settings.value.minLimit = 3;
-        };
-
-        // Reset everything
-        const resetGame = () => {
-          if (confirm('Are you sure you want to reset all players and territories?')) {
-            players.value = [];
-            settings.value = {
-              totalTerritories: 42,
-              divisor: 2,
-              useMinLimit: true,
-              minLimit: 3
-            };
-            localStorage.removeItem('warhelper_save');
+        // Change player color
+        const changePlayerColor = (player, newName) => {
+          const profile = COLOR_PROFILES.find(p => p.name === newName);
+          if (profile) {
+            player.name = profile.name;
+            player.color = profile.color;
           }
         };
 
-        // Territory increments
+        // Increment territories
         const incrementTerritories = (player) => {
-          player.territories = Math.max(0, (player.territories || 0) + 1);
+          player.territories = Math.min(player.territories + 1, 1000);
         };
 
+        // Decrement territories
         const decrementTerritories = (player) => {
-          player.territories = Math.max(0, (player.territories || 0) - 1);
+          player.territories = Math.max(player.territories - 1, 0);
         };
 
-        // Mathematical helper functions for reinforcements
-        const calculateBaseReinforcements = (territoryCount) => {
-          const t = Math.max(0, territoryCount || 0);
-          const base = Math.floor(t / settings.value.divisor);
-          if (settings.value.useMinLimit) {
-            return Math.max(settings.value.minLimit, base);
-          }
-          return base;
+        // Calculate base reinforcements
+        const calculateBaseReinforcements = (territories) => {
+          return Math.floor(territories / settings.value.divisor);
         };
 
+        // Calculate continent bonus
         const calculateContinentBonusValue = (player) => {
-          return player.continents.reduce((acc, name) => {
-            const matched = continentBonuses.find(c => c.name === name);
-            return acc + (matched ? matched.value : 0);
+          return player.continents.reduce((sum, continentName) => {
+            const continent = continentBonuses.find(c => c.name === continentName);
+            return sum + (continent ? continent.value : 0);
           }, 0);
         };
 
+        // Calculate total reinforcements
         const calculateTotalReinforcements = (player) => {
-          return calculateBaseReinforcements(player.territories) + calculateContinentBonusValue(player);
+          const base = calculateBaseReinforcements(player.territories);
+          const continentBonus = calculateContinentBonusValue(player);
+          const total = base + continentBonus;
+          if (settings.value.useMinLimit) {
+            return Math.max(total, settings.value.minLimit);
+          }
+          return total;
         };
 
-        // Computations
-        const totalOwned = computed(() => {
-          return players.value.reduce((acc, p) => acc + (p.territories || 0), 0);
-        });
-
-        const remainingTerritories = computed(() => {
-          const diff = settings.value.totalTerritories - totalOwned.value;
-          return diff > 0 ? diff : 0;
-        });
-
+        // Get percentage for distribution bar
         const getPercentage = (territories) => {
-          if (settings.value.totalTerritories <= 0) return 0;
-          return ((territories || 0) / settings.value.totalTerritories) * 100;
+          const total = settings.value.totalTerritories;
+          return total > 0 ? (territories / total) * 100 : 0;
         };
 
+        // Get remaining unassigned territories
+        const remainingTerritories = computed(() => {
+          const assigned = players.value.reduce((sum, p) => sum + p.territories, 0);
+          return Math.max(settings.value.totalTerritories - assigned, 0);
+        });
+
+        // Get total owned territories
+        const totalOwned = computed(() => {
+          return players.value.reduce((sum, p) => sum + p.territories, 0);
+        });
+
+        // Get available profiles for player
         const getAvailableProfilesFor = (player) => {
           return COLOR_PROFILES.filter(profile => 
             profile.name === player.name || !players.value.some(p => p.name === profile.name)
           );
         };
 
-        const changePlayerColor = (player, newColorName) => {
-          const profile = COLOR_PROFILES.find(p => p.name === newColorName);
-          if (profile) {
-            player.name = profile.name;
-            player.color = profile.color;
+        // TURN MODE FUNCTIONS
+        const enterTurnMode = () => {
+          if (players.value.length > 0) {
+            turnMode.value.active = true;
+            turnMode.value.currentPlayerIndex = 0;
+            turnMode.value.currentPlayer = { ...players.value[0] };
+          }
+        };
+
+        const exitTurnMode = () => {
+          turnMode.value.active = false;
+        };
+
+        const getOpponents = (currentPlayer) => {
+          return players.value.filter(p => p.id !== currentPlayer.id);
+        };
+
+        const recordAttack = (defender) => {
+          // Attacker wins: gain 1 territory from defender
+          const attackerIndex = players.value.findIndex(p => p.id === turnMode.value.currentPlayer.id);
+          const defenderIndex = players.value.findIndex(p => p.id === defender.id);
+          
+          if (attackerIndex !== -1 && defenderIndex !== -1 && players.value[defenderIndex].territories > 0) {
+            players.value[attackerIndex].territories += 1;
+            players.value[defenderIndex].territories -= 1;
+            // Update current player display
+            turnMode.value.currentPlayer = { ...players.value[attackerIndex] };
+          }
+        };
+
+        const nextTurn = () => {
+          turnMode.value.currentPlayerIndex = (turnMode.value.currentPlayerIndex + 1) % players.value.length;
+          turnMode.value.currentPlayer = { ...players.value[turnMode.value.currentPlayerIndex] };
+        };
+
+        const resetGame = () => {
+          if (confirm('Are you sure you want to reset all players and territories?')) {
+            players.value = [];
+            setupStandardGame();
           }
         };
 
@@ -1097,21 +1444,27 @@
           continentBonuses,
           settings,
           players,
+          turnMode,
           addPlayer,
           removePlayer,
-          toggleContinent,
           setupStandardGame,
-          resetGame,
+          toggleContinent,
+          changePlayerColor,
           incrementTerritories,
           decrementTerritories,
           calculateBaseReinforcements,
           calculateContinentBonusValue,
           calculateTotalReinforcements,
-          totalOwned,
-          remainingTerritories,
           getPercentage,
+          remainingTerritories,
+          totalOwned,
           getAvailableProfilesFor,
-          changePlayerColor
+          enterTurnMode,
+          exitTurnMode,
+          getOpponents,
+          recordAttack,
+          nextTurn,
+          resetGame
         };
       }
     }).mount('#app');
