@@ -196,6 +196,18 @@
       display: flex;
       flex-direction: column;
       gap: 16px;
+      cursor: move;
+      transition: all 0.2s;
+    }
+
+    .player-card.dragging {
+      opacity: 0.5;
+      transform: scale(0.95);
+    }
+
+    .player-card.drag-over {
+      border: 2px dashed var(--accent-color);
+      transform: scale(1.02);
     }
 
     .player-card::before {
@@ -221,6 +233,18 @@
       display: flex;
       align-items: center;
       gap: 12px;
+    }
+
+    .drag-handle {
+      cursor: grab;
+      color: var(--text-secondary);
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .drag-handle:active {
+      cursor: grabbing;
     }
 
     .color-picker-wrapper {
@@ -708,24 +732,24 @@
       display: flex;
       flex-direction: column;
       gap: 30px;
-      overflow-y: auto;
-    }
-
-    .turn-player-card {
-      padding: 30px;
-      border: 3px solid;
-      border-radius: 20px;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 40px;
+      justify-content: center;
       align-items: center;
     }
 
-    .turn-player-card.current {
+    .turn-player-card {
+      padding: 40px;
+      border: 4px solid;
+      border-radius: 24px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+      max-width: 900px;
+      width: 100%;
       border-color: var(--player-color, #6366f1);
       background: rgba(99, 102, 241, 0.05);
       backdrop-filter: blur(12px);
-      box-shadow: 0 0 40px rgba(99, 102, 241, 0.2);
+      box-shadow: 0 0 60px rgba(99, 102, 241, 0.3);
     }
 
     .turn-player-info {
@@ -735,7 +759,7 @@
     }
 
     .turn-player-name {
-      font-size: 2.5rem;
+      font-size: 3rem;
       font-weight: 700;
       color: var(--player-color, #6366f1);
     }
@@ -743,34 +767,34 @@
     .turn-player-stats {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 16px;
     }
 
     .turn-stat {
       display: flex;
       align-items: center;
       gap: 12px;
-      font-size: 1.3rem;
+      font-size: 1.4rem;
     }
 
     .turn-stat-label {
       color: var(--text-secondary);
-      min-width: 120px;
+      min-width: 140px;
     }
 
     .turn-stat-value {
       font-weight: 700;
-      font-size: 1.5rem;
+      font-size: 1.8rem;
     }
 
     .turn-attacks-container {
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 20px;
     }
 
     .turn-attacks-title {
-      font-size: 1.2rem;
+      font-size: 1.4rem;
       font-weight: 600;
       color: var(--text-primary);
     }
@@ -779,7 +803,7 @@
       display: flex;
       align-items: center;
       gap: 16px;
-      padding: 16px;
+      padding: 20px;
       background: rgba(15, 23, 42, 0.4);
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 12px;
@@ -787,21 +811,21 @@
     }
 
     .attack-label {
-      font-size: 1.1rem;
+      font-size: 1.2rem;
       font-weight: 500;
       color: var(--text-secondary);
       min-width: 100px;
     }
 
     .attack-button {
-      padding: 12px 24px;
-      font-size: 1rem;
+      padding: 14px 28px;
+      font-size: 1.1rem;
       font-weight: 600;
       border: none;
       border-radius: 10px;
       cursor: pointer;
       transition: all 0.2s;
-      min-width: 140px;
+      min-width: 160px;
     }
 
     .attack-won {
@@ -817,23 +841,10 @@
 
     .defender-badge {
       background: rgba(255, 255, 255, 0.1);
-      padding: 8px 16px;
+      padding: 10px 20px;
       border-radius: 8px;
       font-weight: 600;
-      font-size: 1.05rem;
-    }
-
-    .turn-mode-actions {
-      display: flex;
-      gap: 16px;
-      margin-top: auto;
-    }
-
-    .btn-end-turn {
-      flex: 1;
-      padding: 16px;
-      font-size: 1.1rem;
-      font-weight: 700;
+      font-size: 1.15rem;
     }
 
     .btn-exit-turn {
@@ -842,9 +853,20 @@
       font-weight: 600;
     }
 
+    .btn-end-turn {
+      padding: 18px 40px;
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+
     @media (max-width: 1024px) {
       .turn-player-card {
         grid-template-columns: 1fr;
+        gap: 40px;
+      }
+
+      .turn-player-name {
+        font-size: 2.2rem;
       }
     }
 
@@ -861,16 +883,19 @@
 
       .turn-mode-content {
         padding: 20px;
-        gap: 20px;
       }
 
       .turn-player-card {
-        padding: 20px;
-        gap: 20px;
+        padding: 30px;
+        gap: 30px;
       }
 
       .turn-player-name {
         font-size: 1.8rem;
+      }
+
+      .turn-stat {
+        font-size: 1.1rem;
       }
 
       .attack-row {
@@ -891,7 +916,7 @@
       <div class="turn-mode-header">
         <div class="turn-mode-title">
           <i class="fa-solid fa-sword" style="color: var(--accent-color);"></i>
-          Turn Mode - <span class="current-player-name">{{ turnMode.currentPlayer.name }}'s Turn</span>
+          <span class="current-player-name">{{ turnMode.currentPlayer.name }}'s Turn</span>
         </div>
         <button @click="exitTurnMode" class="btn btn-danger-outline btn-exit-turn">
           <i class="fa-solid fa-times"></i> Exit Turn Mode
@@ -899,9 +924,9 @@
       </div>
 
       <div class="turn-mode-content">
-        <!-- Current Player Card -->
+        <!-- Current Player Card (Only one shown) -->
         <div 
-          class="glass-panel turn-player-card current"
+          class="glass-panel turn-player-card"
           :style="{ '--player-color': turnMode.currentPlayer.color }"
         >
           <div class="turn-player-info">
@@ -940,30 +965,10 @@
             </div>
           </div>
         </div>
-
-        <!-- Opponent Cards (Read-only) -->
-        <div v-for="opponent in getOpponents(turnMode.currentPlayer)" :key="opponent.id" class="glass-panel turn-player-card">
-          <div class="turn-player-info">
-            <div class="turn-player-name" :style="{ color: opponent.color }">{{ opponent.name }}</div>
-            <div class="turn-player-stats">
-              <div class="turn-stat">
-                <span class="turn-stat-label"><i class="fa-solid fa-map"></i> Territories:</span>
-                <span class="turn-stat-value">{{ opponent.territories }}</span>
-              </div>
-              <div class="turn-stat">
-                <span class="turn-stat-label"><i class="fa-solid fa-plus-minus"></i> Reinforcements:</span>
-                <span class="turn-stat-value" style="color: #a5b4fc;">{{ calculateTotalReinforcements(opponent) }}</span>
-              </div>
-            </div>
-          </div>
-          <div style="display: flex; align-items: center; justify-content: center;">
-            <i class="fa-solid fa-shield" style="font-size: 4rem; opacity: 0.3;"></i>
-          </div>
-        </div>
       </div>
 
       <!-- Footer Actions -->
-      <div style="padding: 20px 40px; border-top: 2px solid rgba(255, 255, 255, 0.1); display: flex; gap: 16px;">
+      <div style="padding: 20px 40px; border-top: 2px solid rgba(255, 255, 255, 0.1); display: flex; gap: 16px; justify-content: center;">
         <button @click="nextTurn" class="btn btn-primary btn-end-turn">
           <i class="fa-solid fa-arrow-right"></i> Next Player
         </button>
@@ -1063,10 +1068,20 @@
               :key="player.id" 
               class="glass-panel player-card"
               :style="{ '--player-color': player.color }"
+              draggable="true"
+              @dragstart="startDrag(index, $event)"
+              @dragover.prevent="onDragOver(index, $event)"
+              @dragleave="onDragLeave(index, $event)"
+              @drop="onDrop(index, $event)"
+              :class="{ dragging: draggedIndex === index, 'drag-over': dragOverIndex === index }"
             >
               <!-- Card Header -->
               <div class="player-header">
                 <div class="player-info">
+                  <!-- Drag Handle -->
+                  <div class="drag-handle" title="Drag to reorder">
+                    <i class="fa-solid fa-grip-vertical"></i>
+                  </div>
                   <!-- Player Color Selector -->
                   <select 
                     :value="player.name" 
@@ -1247,6 +1262,10 @@
         // Player states
         const players = ref([]);
 
+        // Drag state
+        const draggedIndex = ref(null);
+        const dragOverIndex = ref(null);
+
         // Turn mode state
         const turnMode = ref({
           active: false,
@@ -1319,6 +1338,35 @@
             { id: 'p3', name: 'Green', color: '#10b981', territories: 12, continents: [], showContinentMenu: false },
             { id: 'p4', name: 'Yellow', color: '#eab308', territories: 12, continents: [], showContinentMenu: false }
           ];
+        };
+
+        // Drag and drop functions
+        const startDrag = (index, event) => {
+          draggedIndex.value = index;
+          event.dataTransfer.effectAllowed = 'move';
+        };
+
+        const onDragOver = (index, event) => {
+          event.preventDefault();
+          if (draggedIndex.value !== null && draggedIndex.value !== index) {
+            dragOverIndex.value = index;
+          }
+        };
+
+        const onDragLeave = (index, event) => {
+          dragOverIndex.value = null;
+        };
+
+        const onDrop = (index, event) => {
+          event.preventDefault();
+          if (draggedIndex.value !== null && draggedIndex.value !== index) {
+            // Swap players
+            const dragged = players.value[draggedIndex.value];
+            players.value.splice(draggedIndex.value, 1);
+            players.value.splice(index, 0, dragged);
+          }
+          draggedIndex.value = null;
+          dragOverIndex.value = null;
         };
 
         // Toggle continent selection for a player
@@ -1429,6 +1477,7 @@
         };
 
         const nextTurn = () => {
+          // Move to next player in turn order
           turnMode.value.currentPlayerIndex = (turnMode.value.currentPlayerIndex + 1) % players.value.length;
           turnMode.value.currentPlayer = { ...players.value[turnMode.value.currentPlayerIndex] };
         };
@@ -1445,6 +1494,8 @@
           settings,
           players,
           turnMode,
+          draggedIndex,
+          dragOverIndex,
           addPlayer,
           removePlayer,
           setupStandardGame,
@@ -1459,6 +1510,10 @@
           remainingTerritories,
           totalOwned,
           getAvailableProfilesFor,
+          startDrag,
+          onDragOver,
+          onDragLeave,
+          onDrop,
           enterTurnMode,
           exitTurnMode,
           getOpponents,
