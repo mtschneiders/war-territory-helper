@@ -200,7 +200,8 @@
       transition: all 0.2s;
     }
 
-    .player-card.dragging {
+    .player-card.dragging,
+    .player-card.touch-dragging {
       opacity: 0.5;
       transform: scale(0.95);
     }
@@ -241,6 +242,9 @@
       font-size: 1.2rem;
       display: flex;
       align-items: center;
+      touch-action: none;
+      -webkit-user-select: none;
+      user-select: none;
     }
 
     .drag-handle:active {
@@ -1145,18 +1149,19 @@
               :key="player.id" 
               class="glass-panel player-card"
               :style="{ '--player-color': player.color }"
+              :data-player-index="index"
               draggable="true"
               @dragstart="startDrag(index, $event)"
               @dragover.prevent="onDragOver(index, $event)"
               @dragleave="onDragLeave(index, $event)"
               @drop="onDrop(index, $event)"
-              :class="{ dragging: draggedIndex === index, 'drag-over': dragOverIndex === index }"
+              :class="{ dragging: draggedIndex === index, 'drag-over': dragOverIndex === index, 'touch-dragging': pointerDragState.active && pointerDragState.index === index }"
             >
               <!-- Card Header -->
               <div class="player-header">
                 <div class="player-info">
                   <!-- Drag Handle -->
-                  <div class="drag-handle" title="Drag to reorder">
+                  <div class="drag-handle" title="Touch or drag to reorder" @pointerdown="startPointerDrag(index, $event)">
                     <i class="fa-solid fa-grip-vertical"></i>
                   </div>
                   <!-- Player Color Selector -->
@@ -1314,7 +1319,7 @@
   
   <!-- App Initialization Script -->
   <script>
-    const { createApp, ref, computed, watch, onMounted } = Vue;
+    const { createApp, ref, computed, watch, onMounted, onBeforeUnmount } = Vue;
 
     createApp({
       setup() {
@@ -1342,6 +1347,51 @@
         // Drag state
         const draggedIndex = ref(null);
         const dragOverIndex = ref(null);
+        const pointerDragState = ref({ active: false, index: null, pointerId: null });
+
+        const reorderPlayers = (fromIndex, toIndex) => {
+          if (fromIndex === null || toIndex === null || fromIndex === toIndex) return;
+          const [dragged] = players.value.splice(fromIndex, 1);
+          players.value.splice(toIndex, 0, dragged);
+        };
+
+        const startPointerDrag = (index, event) => {
+          if (event.pointerType === 'mouse' && event.button !== 0) return;
+          draggedIndex.value = index;
+          dragOverIndex.value = null;
+          pointerDragState.value = { active: true, index, pointerId: event.pointerId };
+          event.preventDefault();
+        };
+
+        const onPointerMove = (event) => {
+          if (!pointerDragState.value.active || event.pointerId !== pointerDragState.value.pointerId) return;
+
+          const target = document.elementFromPoint(event.clientX, event.clientY);
+          const card = target?.closest('.player-card');
+
+          if (card) {
+            const hoveredIndex = Number.parseInt(card.dataset.playerIndex, 10);
+            if (!Number.isNaN(hoveredIndex) && hoveredIndex !== draggedIndex.value) {
+              dragOverIndex.value = hoveredIndex;
+            } else if (hoveredIndex === draggedIndex.value) {
+              dragOverIndex.value = null;
+            }
+          }
+
+          event.preventDefault();
+        };
+
+        const endPointerDrag = (event) => {
+          if (!pointerDragState.value.active || event.pointerId !== pointerDragState.value.pointerId) return;
+
+          if (dragOverIndex.value !== null && draggedIndex.value !== null && dragOverIndex.value !== draggedIndex.value) {
+            reorderPlayers(draggedIndex.value, dragOverIndex.value);
+          }
+
+          draggedIndex.value = null;
+          dragOverIndex.value = null;
+          pointerDragState.value = { active: false, index: null, pointerId: null };
+        };
 
         // Turn mode state
         const turnMode = ref({
@@ -1365,6 +1415,16 @@
             // Setup default game
             setupStandardGame();
           }
+
+          window.addEventListener('pointermove', onPointerMove);
+          window.addEventListener('pointerup', endPointerDrag);
+          window.addEventListener('pointercancel', endPointerDrag);
+        });
+
+        onBeforeUnmount(() => {
+          window.removeEventListener('pointermove', onPointerMove);
+          window.removeEventListener('pointerup', endPointerDrag);
+          window.removeEventListener('pointercancel', endPointerDrag);
         });
 
         // Watchers to auto-save states
@@ -1420,7 +1480,10 @@
         // Drag and drop functions
         const startDrag = (index, event) => {
           draggedIndex.value = index;
-          event.dataTransfer.effectAllowed = 'move';
+          dragOverIndex.value = null;
+          if (event.dataTransfer) {
+            event.dataTransfer.effectAllowed = 'move';
+          }
         };
 
         const onDragOver = (index, event) => {
@@ -1437,10 +1500,7 @@
         const onDrop = (index, event) => {
           event.preventDefault();
           if (draggedIndex.value !== null && draggedIndex.value !== index) {
-            // Swap players
-            const dragged = players.value[draggedIndex.value];
-            players.value.splice(draggedIndex.value, 1);
-            players.value.splice(index, 0, dragged);
+            reorderPlayers(draggedIndex.value, index);
           }
           draggedIndex.value = null;
           dragOverIndex.value = null;
@@ -1573,6 +1633,7 @@
           turnMode,
           draggedIndex,
           dragOverIndex,
+          pointerDragState,
           addPlayer,
           removePlayer,
           setupStandardGame,
@@ -1588,9 +1649,12 @@
           totalOwned,
           getAvailableProfilesFor,
           startDrag,
+          startPointerDrag,
           onDragOver,
           onDragLeave,
           onDrop,
+          onPointerMove,
+          endPointerDrag,
           enterTurnMode,
           exitTurnMode,
           getOpponents,
